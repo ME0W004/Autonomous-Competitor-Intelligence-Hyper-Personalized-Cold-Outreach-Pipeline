@@ -1,0 +1,39 @@
+{
+  "agency_name": "Apex Outreach & AI Systems",
+  "core_value_proposition": "We help high-growth B2B companies automate customer acquisition, build bespoke AI pipelines, and fix leaky revenue funnels without adding bloated headcount.",
+  "offerings": [
+    {
+      "service_id": "ai_agentic_workflows",
+      "title": "Autonomous AI Agent Workflows & Pipeline Automation",
+      "pain_points_addressed": [
+        "Manual research and repetitive operational workflows taking hours of SDR/Operations time",
+        "Slow customer response times or disjointed sales data",
+        "Inefficient data entry and lack of modern automated tooling"
+      ],
+      "proof_and_case_study": "Built automated competitor intelligence and prospecting engine for an enterprise SaaS, cutting research time by 82% and doubling qualified pipeline in 60 days.",
+      "suggested_soft_cta": "Would you be open to checking out a 90-second loom showing how this workflow maps directly to your current process?"
+    },
+    {
+      "service_id": "b2b_outreach_infrastructure",
+      "title": "Hyper-Targeted Cold Outreach & Deliverability Infrastructure",
+      "pain_points_addressed": [
+        "Cold emails landing in spam or low open/reply rates due to generic templates",
+        "Domain reputation issues and broken SPF/DKIM/DMARC configurations",
+        "High customer acquisition cost (CAC) and inconsistent inbound pipeline"
+      ],
+      "proof_and_case_study": "Scaled cold outreach infrastructure for a mid-market tech firm to 45% open rates and 18% positive response rate using semantic deep-personalization.",
+      "suggested_soft_cta": "Open to seeing a quick breakdown of the 3 deliverability tweaks we used for a similar team in your space?"
+    },
+    {
+      "service_id": "product_ux_conversion_optimization",
+      "title": "B2B SaaS Onboarding & Conversion Rate Optimization (CRO)",
+      "pain_points_addressed": [
+        "Unclear pricing tier or vague value propositions on landing pages causing high bounce rates",
+        "Friction in product signup or demo booking flows",
+        "Lack of interactive self-serve product tours leading to lost inbound leads"
+      ],
+      "proof_and_case_study": "Redesigned landing page messaging and onboarding funnel for a fintech platform, increasing demo-to-close conversion by 34%.",
+      "suggested_soft_cta": "Would it be helpful if I sent over a short 2-minute teardown of two subtle conversion leaks on your pricing page?"
+    }
+  ]
+}

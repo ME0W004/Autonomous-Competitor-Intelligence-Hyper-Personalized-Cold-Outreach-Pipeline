@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  outreach-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: b2b_cold_outreach_pipeline
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    command: ["run", "--input", "data/input/sample_domains.csv", "--concurrency", "5", "--delay", "1.0"]
+    restart: "no"
