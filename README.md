@@ -1,5 +1,11 @@
 # 🚀 Autonomous Competitor Intelligence & Hyper-Personalized Cold Outreach Pipeline
 
+<div align="center">
+
+**[English](README.md)** • **[فارسی](README.fa.md)**
+
+</div>
+
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![Crawl4AI](https://img.shields.io/badge/Crawler-Crawl4AI%20v0.9-orange.svg)](https://github.com/unclecode/crawl4ai)
 [![CrewAI](https://img.shields.io/badge/Multi--Agent-CrewAI-red.svg)](https://github.com/crewAIInc/crewAI)
