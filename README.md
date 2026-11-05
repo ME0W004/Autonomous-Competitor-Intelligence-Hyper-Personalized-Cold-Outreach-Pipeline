@@ -1,203 +1,314 @@
 # 🚀 Autonomous Competitor Intelligence & Hyper-Personalized Cold Outreach Pipeline
 
-یک خط لوله صنعتی، مدرن و عملیاتی در حوزه فروش B2B جهت **خزش خودکار وب‌سایت‌های هدف، تحلیل عمیق مدل کسب‌وکار و نقاط درد (Pain Points)، تطبیق با کاتالوگ خدمات ما، و نگارش ایمیل‌های سرد فوق‌شخصی‌سازی‌شده (Hyper-Personalized Cold Outreach)** بر اساس الگوی ۳ پاراگرافی `Hook -> Value -> Soft CTA`.
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![Crawl4AI](https://img.shields.io/badge/Crawler-Crawl4AI%20v0.9-orange.svg)](https://github.com/unclecode/crawl4ai)
+[![CrewAI](https://img.shields.io/badge/Multi--Agent-CrewAI-red.svg)](https://github.com/crewAIInc/crewAI)
+[![Pydantic](https://img.shields.io/badge/Validation-Pydantic%20v2-green.svg)](https://docs.pydantic.dev/)
+[![Docker](https://img.shields.io/badge/Container-Docker%20Compose-2496ED.svg)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
-این موتور خروجی‌های ساختاریافته در قالب **CSV، Excel و JSON** تولید می‌کند که مستقیماً قابل بارگذاری (Upload/Import) در پلتفرم‌های مطرح ارسال ایمیل سرد مانند **Instantly.ai**، **Smartlead.ai**، **Lemlist** و **Apollo** هستند.
+An enterprise-grade, asynchronous B2B pipeline designed to automate competitor intelligence gathering, value proposition matching, and high-conversion cold email drafting. Built for modern B2B revenue teams, outbound agencies, and sales development representatives (SDRs).
+
+Instead of wasting dozens of hours manually reading company websites and writing repetitive templates that trigger spam filters, this system automatically crawls target domains across strategic subpages, uncovers concrete bottlenecks, maps them against your agency's service portfolio, and generates hyper-personalized, 3-paragraph cold emails based on the proven **`Hook -> Value -> Soft CTA`** framework.
+
+Output datasets are generated in standardized **CSV, Excel (.xlsx), and JSON** formats engineered for direct, zero-friction import into modern sales engagement platforms such as **Instantly.ai**, **Smartlead.ai**, **Lemlist**, and **Apollo.io**.
 
 ---
 
-## 🏗️ معماری پایپلاین (System Architecture)
+## 🏗️ System Architecture
 
-سیستم از ترکیب هسته بهترین ابزارهای تست‌شده متن‌باز ساخته شده است:
-1. **Crawl4AI (`unclecode/crawl4ai`):** موتور خزش همگام، رندر جاوااسکریپت با کرومیوم، حذف نویزها با `PruningContentFilter` و استخراج ساختاریافته متون صفحات کلیدی (`/`, `/about`, `/services`, `/pricing`).
-2. **CrewAI Examples (`crewAIInc/crewAI-examples`):** پیاده‌سازی معماری سه ایجنتی متوالی (Sequential Multi-Agent Crew) با مدل‌های داده Pydantic جهت پیشگیری از خطای توهم.
-3. **Cold Email Architecture (`codebasics/cold-email-generator`):** ماتریس تطبیق خودکار نیازهای مشتری با مهارت‌ها و نمونه‌کارهای ارائه‌دهنده (`config/our_portfolio.json`).
+The pipeline connects three battle-tested open-source paradigms into a unified, rate-limited batch architecture:
+
+1. **[Crawl4AI](https://github.com/unclecode/crawl4ai):** High-speed asynchronous browser crawler powered by Playwright/Chromium. Handles heavy JavaScript rendering, strips boilerplate/cookies/ads using `PruningContentFilter`, and compiles multi-page dossiers (`/`, `/about`, `/services`, `/pricing`). Includes an automatic HTTP + BeautifulSoup resilient fallback.
+2. **[CrewAI Examples](https://github.com/crewAIInc/crewAI-examples):** Sequential multi-agent orchestration modeled after enterprise patterns (`lead-score-iq` and `marketing_strategy`). Enforces strict output validation through Pydantic schemas to eliminate hallucinations.
+3. **[Cold Email Generator](https://github.com/codebasics/cold-email-generator):** Dynamic portfolio matching engine that pairs uncovered client pain points with your organization's specific service offerings, proof metrics, and case studies (`config/our_portfolio.json`).
 
 ```mermaid
 flowchart TD
-    subgraph IN["۱. ورودی دسته‌ای (Batch Input)"]
-        CSV["فایل ورودی: data/input/sample_domains.csv<br/>(۵۰ تا ۵۰۰ دامنه)"]
+    subgraph INPUT["1. Batch Input Layer"]
+        CSV["Target Domains CSV<br/>(50 to 500+ domains)"]
     end
 
-    subgraph CRAWL["۲. موتور خزش صنعتی Crawl4AI"]
-        DISC["Normalizer & Priority Paths Discovery<br/>(/, /about, /services, /pricing)"]
-        ENG["AsyncWebCrawler Engine<br/>(Headless Chromium + Concurrency Semaphore)"]
-        FILT["PruningContentFilter<br/>(حذف استایل‌ها، تبلیغات، کوکی و بنرها)"]
-        FALL["HTTP + BeautifulSoup Resilient Fallback<br/>(در صورت بروز خطای SSL یا Cloudflare)"]
-        MD["Dossier مارک‌داون یکپارچه هر دامنه"]
+    subgraph CRAWLER["2. Resilient Crawling Engine (Crawl4AI)"]
+        NORM["URL Normalizer & Strategic Path Discovery<br/>(/, /about, /services, /pricing)"]
+        ASYNC_CRAWL["AsyncWebCrawler Engine<br/>(Chromium + Semaphore Rate Limiter)"]
+        FILTER["PruningContentFilter<br/>(Strips CSS, Nav, Footers, Ads, Cookie Banners)"]
+        FALLBACK["Resilient HTTP Fallback Engine<br/>(Captures Static Content on Bot Defense/SSL Failure)"]
+        DOSSIER["Clean Markdown Intelligence Dossier"]
     end
 
-    subgraph CREW["۳. زنجیره تصمیم‌گیری ۳ ایجنتی CrewAI"]
-        A1["ایجنت اول: Market & Tech Analyst<br/>(شناسایی هویت، مدل درآمدی و ۳ چالش کلیدی)"]
-        A2["ایجنت دوم: Offer Matcher<br/>(تطبیق چالش با کاتالوگ خدمات و کیس‌استادی ما)"]
-        A3["ایجنت سوم: B2B Cold Copywriter<br/>(نگارش ایمیل ۳ پاراگرافی Hook-Value-Soft CTA)"]
+    subgraph CREW["3. CrewAI Multi-Agent Pipeline"]
+        AGENT1["Agent 1: Market & Tech Analyst<br/>(Business Model, Target ICP & Evidence-Backed Pain Points)"]
+        AGENT2["Agent 2: Solutions Architect & Offer Matcher<br/>(Maps Bottlenecks to Our Portfolio & Case Studies)"]
+        AGENT3["Agent 3: B2B Cold Outreach Copywriter<br/>(Drafts 3-Paragraph Hook-Value-Soft CTA Email under 110 Words)"]
     end
 
-    subgraph OUT["۴. لایه اعتبارسنجی و خروجی استاندارد"]
-        PYD["اعتبارسنجی ساختار با Pydantic Schemas"]
-        EXCEL["data/output/campaign_*.xlsx<br/>(سازگار با Instantly / Smartlead)"]
-        CSV_OUT["data/output/campaign_*.csv<br/>(UTF-8 BOM جهت حفظ کاراکترها)"]
-        DLQ["data/logs/failed_domains.jsonl<br/>(صف خطاهای دامنه‌های خاموش یا مسدود)"]
+    subgraph OUTPUT["4. Validation & Delivery Layer"]
+        PYDANTIC["Pydantic Schema Validation<br/>(CompanyIntelligence & OutreachEmailDraft)"]
+        OUT_CSV["data/output/*.csv<br/>(UTF-8 BOM for Instantly / Smartlead)"]
+        OUT_XLSX["data/output/*.xlsx<br/>(Structured Excel Workbook)"]
+        OUT_JSON["data/output/*.json<br/>(Raw API & CRM Payload)"]
+        DLQ["data/logs/failed_domains.jsonl<br/>(Dead-Letter Error Queue for Offline Sites)"]
     end
 
-    CSV --> DISC
-    DISC --> ENG
-    ENG -- "موفق" --> FILT --> MD
-    ENG -- "خطا / تایم‌اوت" --> FALL
-    FALL -- "موفق" --> MD
-    FALL -- "آفلاین / ناموفق" --> DLQ
+    CSV --> NORM
+    NORM --> ASYNC_CRAWL
+    ASYNC_CRAWL -- "Success" --> FILTER --> DOSSIER
+    ASYNC_CRAWL -- "Timeout / Blocked" --> FALLBACK
+    FALLBACK -- "Recovered" --> DOSSIER
+    FALLBACK -- "Unreachable" --> DLQ
 
-    MD --> A1
-    A1 --> A2
-    A2 --> A3
-    A3 --> PYD
-    PYD --> CSV_OUT
-    PYD --> EXCEL
+    DOSSIER --> AGENT1
+    AGENT1 --> AGENT2
+    AGENT2 --> AGENT3
+    AGENT3 --> PYDANTIC
+    PYDANTIC --> OUT_CSV
+    PYDANTIC --> OUT_XLSX
+    PYDANTIC --> OUT_JSON
 ```
 
 ---
 
-## 📁 ساختار پوشه‌بندی و فایل‌ها
+## 🤖 Multi-Agent Workflow & Task Breakdown
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant D as Domain Dossier
+    participant A1 as Market & Tech Analyst
+    participant A2 as Offer Matcher
+    participant A3 as B2B Cold Copywriter
+    participant V as Pydantic Validator
+    participant E as Exporter (CSV/XLSX)
+
+    D->>A1: Raw multi-page markdown content
+    Note over A1: Extracts Company Name, Business Model,<br/>Target Audience (ICP), and 2-3 Pain Points
+    A1->>A2: CompanyIntelligence schema
+    Note over A2: Compares pain points against<br/>our_portfolio.json offering catalog
+    A2->>A3: MatchedOffering + Case Study Angle
+    Note over A3: Writes Hook (site proof), Value (case study metric),<br/>and Frictionless Soft CTA (< 110 words)
+    A3->>V: OutreachEmailDraft schema
+    V->>E: Flattened Record with Confidence Score
+```
+
+### 1. Market & Tech Intelligence Analyst
+- **Role:** `Senior B2B Market & Tech Intelligence Analyst`
+- **Objective:** Scrutinizes website content, strips away promotional fluff, identifies formal company branding, clarifies revenue model, and discovers 2-3 concrete operational, conversion, or messaging bottlenecks backed by literal text citations.
+- **Output:** `CompanyIntelligence` Pydantic model.
+
+### 2. Solutions Architect & Offer Matcher
+- **Role:** `B2B Solutions Architect & Offer Matcher`
+- **Objective:** Examines the analyst's findings and cross-references them with our active portfolio (`config/our_portfolio.json`). Selects the single best-fitting service offering and matches it with a proven quantitative case study metric.
+- **Output:** `MatchedOffering` Pydantic model.
+
+### 3. B2B Cold Copywriter
+- **Role:** `High-Converting B2B Cold Outreach Copywriter`
+- **Objective:** Crafts a punchy, non-spammy cold email using modern enterprise outreach conventions:
+  - **Subject Line 1 & 2:** Short, curiosity or pain-driven (2 to 5 words).
+  - **Paragraph 1 (Hook):** Direct, specific observation showing genuine familiarity with their current website/product.
+  - **Paragraph 2 (Value):** Seamless transition explaining how we solved that exact bottleneck, citing a relevant metric.
+  - **Paragraph 3 (Soft CTA):** Low-friction question asking permission to share a short video or 1-page breakdown (zero aggressive calendar links).
+- **Output:** `OutreachEmailDraft` Pydantic model.
+
+---
+
+## 📁 Repository Structure
 
 ```text
 ├── config/
-│   ├── our_portfolio.json      # کاتالوگ مهارت‌ها، ارزش‌های پیشنهادی و نمونه‌کارهای ما
-│   └── settings.py             # مدیریت تنظیمات و متغیرهای محیطی با Pydantic Settings
+│   ├── our_portfolio.json          # Portfolio catalog: value props, services & case studies
+│   └── settings.py                 # Pydantic Settings for crawler, LLM keys, and paths
 ├── data/
-│   ├── input/                  # فایل‌های CSV ورودی (شامل دامنه‌های هدف)
-│   ├── output/                 # نتایج نهایی (CSV، Excel، JSON)
-│   └── logs/                   # لاگ دامنه‌های ناموفق (failed_domains.jsonl)
+│   ├── input/sample_domains.csv    # Sample domain input list
+│   ├── output/                     # Generated CSV, Excel, and JSON campaign files
+│   └── logs/failed_domains.jsonl   # Dead-letter error queue for unreachable domains
 ├── src/
 │   ├── agents/
-│   │   ├── crew_pipeline.py    # پیکربندی ۳ ایجنت و تسک‌های CrewAI + فال‌بک هوشمند
-│   │   └── schemas.py          # ساختارهای Pydantic (CompanyIntelligence, OutreachEmailDraft)
+│   │   ├── crew_pipeline.py        # CrewAI 3-agent orchestration with heuristic fallback
+│   │   └── schemas.py              # Pydantic schemas (CompanyIntelligence, OutreachEmailDraft)
 │   ├── crawler/
-│   │   ├── cleaner.py          # فیلترسازی متون، استخراج متادیتا و تلفیق صفحات
-│   │   └── engine.py           # موتور همگام Crawl4AI و فال‌بک مقاوم HTTP
+│   │   ├── cleaner.py              # Markdown sanitization, link stripping & page aggregation
+│   │   └── engine.py               # Crawl4AI AsyncWebCrawler + HTTP fallback engine
 │   ├── pipeline/
-│   │   ├── batch_processor.py  # هماهنگ‌کننده پردازش دسته‌ای با Semaphore و Rate Limiter
-│   │   └── exporter.py         # تولید خروجی استاندارد برای ابزارهای ارسال انبوه
-│   └── cli.py                  # رابط خط فرمان مدرن و زنده (Rich + Typer)
+│   │   ├── batch_processor.py      # Batch runner with Semaphore concurrency & rate limiting
+│   │   └── exporter.py             # Formatter for Instantly / Smartlead / Lemlist schemas
+│   └── cli.py                      # Rich terminal CLI with interactive progress tracking
 ├── tests/
-│   └── test_pipeline.py        # تست‌های اعتبارسنجی پایپلاین
-├── .env.example                # قالب متغیرهای محیطی
-├── docker-compose.yml          # استقرار سریع کانتینری
-├── Dockerfile                  # تصویر Docker همراه با ملزومات کرومیوم
-├── requirements.txt            # پکیج‌های پایتون مورد نیاز
-└── README.md                   # مستندات فنی و راهنمای راه‌اندازی
+│   └── test_pipeline.py            # Automated pytest suite
+├── .env.example                    # Environment variable configuration template
+├── docker-compose.yml              # One-command Docker orchestration
+├── Dockerfile                      # Production Docker container with Playwright Chromium
+├── requirements.txt                # Pinned production dependencies
+└── README.md                       # Comprehensive engineering documentation
 ```
 
 ---
 
-## ⚙️ راهنمای متغیرهای محیطی (`.env`)
+## ⚙️ Environment Configuration (`.env`)
 
-یک فایل با نام `.env` در ریشه پروژه ایجاد کرده و مقادیر زیر را در آن تنظیم کنید:
+Copy `.env.example` to `.env` in the root directory:
+
+```bash
+cp .env.example .env
+```
+
+Configure your parameters:
 
 ```env
-# کلیدهای API مدل‌های زبانی (حداقل یکی را وارد کنید)
+# LLM Provider Keys (At least one required for AI generation)
 OPENAI_API_KEY=sk-proj-...
 GEMINI_API_KEY=AIzaSy...
 ANTHROPIC_API_KEY=sk-ant-...
 GROQ_API_KEY=gsk_...
 
-# مدل زبانی مورد استفاده (پیش‌فرض: gpt-4o-mini)
+# LLM Model Selector
+# Examples: "gpt-4o-mini", "gpt-4o", "gemini/gemini-1.5-flash", "groq/llama-3.3-70b-versatile"
 LLM_MODEL=gpt-4o-mini
 LLM_TEMPERATURE=0.2
 
-# تنظیمات خزشگر Crawl4AI
+# Crawler Engine Configuration
 CRAWLER_HEADLESS=true
 CRAWLER_CONCURRENCY=5
 CRAWLER_PAGE_TIMEOUT_MS=30000
 CRAWLER_WORD_COUNT_THRESHOLD=15
 MAX_SUBPAGES_PER_DOMAIN=3
 
-# زبان ایمیل‌ها و تاخیر بین درخواست‌ها
+# Cold Outreach Configuration
 DEFAULT_OUTREACH_LANGUAGE=en
 RATE_LIMIT_DELAY_SECONDS=1.0
 ```
 
 > [!NOTE]
-> در صورتی که کلید API تنظیم نشده باشد، پایپلاین با **مولد هیوریستیک هوشمند (Deterministic Fallback)** اجرا می‌شود تا بتوانید کل ساختار خزش، اعتبارسنجی و خروجی را پیش از اتصال کلید پروداکشن تست کنید.
+> **Zero-Key Test Mode:** If no LLM API key is detected, the pipeline automatically activates its **Deterministic Smart Fallback**. This allows complete testing of the crawler, multi-page aggregator, and CSV/Excel exporters without consuming API credits.
 
 ---
 
-## 🚀 نصب و راه‌اندازی سریع
+## 🚀 Installation & Quickstart
 
-### روش ۱: اجرای مستقیم با پایتون (توصیه‌شده با `uv`)
+### Method 1: Local Installation (Recommended with `uv`)
 
 ```bash
-# ایجاد محیط مجازی با پایتون 3.11
-uv venv .venv
-.venv\Scripts\activate   # در ویندوز (یا source .venv/bin/activate در لینوکس/مک)
+# 1. Clone repository
+git clone https://github.com/Me0w004/Autonomous-Competitor-Intelligence-Hyper-Personalized-Cold-Outreach-Pipeline.git
+cd Autonomous-Competitor-Intelligence-Hyper-Personalized-Cold-Outreach-Pipeline
 
-# نصب وابستگی‌ها
+# 2. Create and activate virtual environment
+uv venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+# 3. Install dependencies
 uv pip install -r requirements.txt
 
-# نصب مرورگر کرومیوم برای Playwright و Crawl4AI
+# 4. Install Playwright browser binaries
 playwright install chromium
 ```
 
-### روش ۲: اجرای کانتینری با Docker Compose
+### Method 2: Docker & Docker Compose
 
 ```bash
+# Build and run the batch container
 docker-compose up --build
 ```
 
 ---
 
-## 💻 راهنمای دستورات خط فرمان (CLI Reference)
+## 💻 CLI Commands & Usage Guide
 
-پایپلاین مجهز به یک رابط ترمینال پیشرفته همراه با پروگرسبار زنده و جدول‌های تفکیکی است:
+The system includes a dedicated terminal interface featuring live progress meters, styled summaries, and execution metrics:
 
-### ۱. پردازش دسته‌ای دامنه‌ها (Batch Execution)
+### 1. Batch Execution Across Multiple Domains
+Processes a CSV list of company domains concurrently with rate limiting and automatic export:
+
 ```bash
 python src/cli.py run --input data/input/sample_domains.csv --concurrency 5 --delay 1.0 --lang en
 ```
 
-### ۲. تست زنده و سریع روی یک دامنه (Single Domain Test)
-برای مشاهده آنی تحلیل، نقاط درد استخراج‌شده و متن ایمیل یک شرکت:
+**Options:**
+- `--input, -i`: Path to the input CSV file.
+- `--output-name, -o`: Custom base name for exported files.
+- `--concurrency, -c`: Maximum concurrent crawl workers (default: `5`).
+- `--delay, -d`: Rate-limiting pause between domains in seconds (default: `1.0`).
+- `--lang, -l`: Email output language (`en` or `fa`, default: `en`).
+
+### 2. Single Domain Live Audit & Draft Preview
+Quickly audits a single domain and prints the extracted intelligence, identified pain points, and cold email draft directly in the terminal:
+
 ```bash
-python src/cli.py test-domain stripe.com
+python src/cli.py test-domain linear.app
 ```
 
-### ۳. مشاهده کاتالوگ خدمات و ماتریس ارزش ما (Portfolio)
+### 3. Inspect Service Portfolio & Value Props
+View the current active services and proof metrics loaded from `config/our_portfolio.json`:
+
 ```bash
 python src/cli.py portfolio
 ```
 
-### ۴. بررسی وضعیت و سلامت سیستم (Diagnostics)
+### 4. System Diagnostics & Health Check
+Verifies LLM API key configurations, directory structures, and runtime dependencies:
+
 ```bash
 python src/cli.py diagnostics
 ```
 
 ---
 
-## 📊 مشخصات خروجی استاندارد (CRM & Cold Email Tools)
+## 📊 Export Data Format (Instantly & Smartlead Compatible)
 
-فایل‌های اکسل و CSV تولیدشده در پوشه `data/output/` دارای ستون‌های آماده برای نگاشت در Instantly و Smartlead هستند:
+Exported files (`data/output/campaign_*.csv` and `data/output/campaign_*.xlsx`) provide standardized columns mapped to custom merge variables in cold outreach software:
 
-| نام ستون | توضیح داده | نمونه |
+| Column Name | Description | Example Value |
 | :--- | :--- | :--- |
-| `Domain` | دامنه شرکت هدف | `linear.app` |
-| `Company_Name` | نام استخراج‌شده شرکت | `Linear` |
-| `Business_Model` | مدل کسب‌وکار | `B2B Project Management SaaS` |
-| `Target_Audience` | مخاطبان هدف شرکت | `Engineering & Product teams` |
-| `Identified_Pain_Point` | نقطه درد شناسایی‌شده از روی سایت | `Scaling manual inbound qualification` |
-| `Evidence_Snippet` | متن سند استخراج‌شده از سایت | `Quote from pricing/features page` |
-| `Matched_Service` | خدمت متناظر از سبد ما | `Autonomous AI Agent Workflows` |
-| `Personalized_Subject_1` | موضوع ایمیل (کنجکاوی) | `quick idea for Linear` |
-| `Personalized_Subject_2` | موضوع ایمیل (مبتنی بر درد) | `scaling Linear's pipeline` |
-| `Email_Body_Draft` | متن ۳ پاراگرافی کامل | `Hook + Value Proof + Soft CTA` |
-| `Hook_Sentence` | جمله اول کاملاً شخصی‌سازی‌شده | `Was looking through linear.app and...` |
-| `Value_Sentence` | جمله راه‌حل و کیس‌استادی | `We recently built an autonomous...` |
-| `Soft_CTA` | درخواست سبک بدون فشار | `Open to checking a 2-min breakdown?` |
-| `Confidence_Score` | امتیاز انطباق استراتژیک (۰ تا ۱) | `0.92` |
-| `Status` | وضعیت پردازش | `SUCCESS` یا `FAILED` |
+| `Domain` | Clean domain of the prospect | `linear.app` |
+| `Company_Name` | Formal brand name extracted from site | `Linear` |
+| `Business_Model` | Identified business model | `B2B Project Management SaaS` |
+| `Target_Audience` | Core customer profile (ICP) | `High-growth engineering and product teams` |
+| `Identified_Pain_Point`| Specific bottleneck identified on website | `Scaling inbound triage and sprint automation` |
+| `Evidence_Snippet` | Direct site citation backing the finding | `Manual issue tracking workflows mentioned in docs` |
+| `Matched_Service` | Corresponding offering from our portfolio | `Autonomous AI Agent Workflows & Automation` |
+| `Personalized_Subject_1` | Curiosity subject line (under 5 words) | `quick idea for Linear` |
+| `Personalized_Subject_2` | Pain-focused subject line | `scaling Linear's pipeline` |
+| `Email_Body_Draft` | Complete 3-paragraph personalized email | `Hook + Value Proposition + Low-friction Soft CTA` |
+| `Hook_Sentence` | Individual opening sentence variable | `Was reviewing linear.app and noticed...` |
+| `Value_Sentence` | Individual case study / value variable | `We recently built an autonomous pipeline for...` |
+| `Soft_CTA` | Low-friction CTA variable | `Open to checking out a 90-second loom?` |
+| `Confidence_Score` | Match confidence score (0.00 to 1.00) | `0.88` |
+| `Status` | Processing status | `SUCCESS` or `FAILED` |
+| `Pages_Crawled` | Total pages crawled for this domain | `3` |
+| `Error_Message` | Recorded error reason (if failed) | `None` |
 
 ---
 
-## 🛡️ مدیریت خطاهای دنیای واقعی (Edge Cases Resilience)
+## 🛡️ Production Edge-Case Resilience
 
-1. **سایت‌های آفلاین یا خطای ۴۰۴:** خزشگر پس از سپری شدن مهلت (`CRAWLER_PAGE_TIMEOUT_MS`) دامنه را علامت‌گذاری کرده و به صف خطای `data/logs/failed_domains.jsonl` منتقل می‌کند؛ هیچ خطایی باعث توقف بچ نمی‌شود.
-2. **سدهای Cloudflare یا گواهی منقضی SSL:** تنظیم `ignore_https_errors=True` و سیستم فال‌بک دو مرحله‌ای HTTP باعث می‌شود بخش عمده متون استاتیک حتی بدون رندر کامل مرورگر نجات داده شوند.
-3. **کنترل نرخ درخواست (Rate Limiting & Concurrency):** بهره‌گیری از `asyncio.Semaphore` و وقفه قابل تنظیم بین دامنه‌ها مانع از مسدود شدن IP سرور می‌گردد.
+1. **Unreachable Sites & 404s:** When a website is offline, times out, or returns a 404, it is flagged with status `FAILED` and recorded into `data/logs/failed_domains.jsonl`. The batch pipeline continues uninterrupted.
+2. **Cloudflare & Anti-Bot Mitigations:** Includes randomized User-Agents, desktop viewport emulation, disabled headless detection, and an asynchronous fallback using HTTP + BeautifulSoup when headless browser navigation is blocked.
+3. **Invalid SSL Certificates:** Enforces `ignore_https_errors=True` and `ssl=False` so domains with expired or misconfigured SSL certificates can still be analyzed.
+4. **Rate Limiting & Anti-Ban Protections:** Configurable per-domain delays and concurrency semaphores prevent IP bans and local memory exhaustion.
+
+---
+
+## 🧪 Testing
+
+Execute the automated test suite with pytest:
+
+```bash
+pytest tests/test_pipeline.py -v
+```
+
+All 6 test suites validate:
+- URL normalization (HTTP -> HTTPS, trailing slashes, clean hostnames).
+- Markdown sanitization (removal of base64 images, link URLs, whitespace normalization).
+- Multi-page intelligence dossier assembly.
+- Portfolio schema and case-study loader.
+- Pydantic models serialization and validation.
+- Output generation across CSV (UTF-8 BOM), Excel (.xlsx), and JSON.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
